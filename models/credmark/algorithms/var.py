@@ -1,10 +1,3 @@
-from typing import (
-    List,
-    Optional,
-    Dict,
-    Union,
-)
-
 from datetime import (
     datetime,
     timezone,
@@ -30,30 +23,17 @@ from models.credmark.algorithms.risk import calc_var
 import numpy as np
 import pandas as pd
 
+import credmark.model
+from credmark.model import ModelRunError
 
-class PriceList(DTO):
-    price: Price
-    token: Address
+from models.credmark.algorithms.risk import (
+    calc_var
+)
 
-
-class VaRInput(DTO):
-    # block_number: int
-    portfolio: Portfolio
-    window: str
-    intervals: List[str] = DTOField(...)
-    confidences: List[float] = DTOField(..., ge=0.0, le=1.0)  # accepts multiple values
-    asOfs: Optional[List[date]]
-    asOfsRange: Optional[bool] = DTOField(False)
-    debug: Optional[bool] = DTOField(False)
-
-    class Config:
-        validate_assignment = True
-
-
-class VaROutput(DTO):
-    window: str
-    # asOf/interval/confidence -> var
-    var: Dict[str, Dict[str, Dict[float, float]]]
+from models.credmark.algorithms.dto import (
+    VaRPortfolioInput,
+    VaROutput
+)
 
 
 @credmark.model.describe(slug='finance.var',
