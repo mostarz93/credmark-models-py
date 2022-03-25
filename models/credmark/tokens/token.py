@@ -171,7 +171,12 @@ class CategorizedSupplyResponse(CategorizedSupplyRequest):
                          output=CategorizedSupplyResponse)
 class TokenCirculatingSupply(credmark.model.Model):
     def run(self, input: CategorizedSupplyRequest) -> CategorizedSupplyResponse:
+        if input.token.price_usd is None:
+            raise ModelDataError('Input token price is None')
         response = CategorizedSupplyResponse(**input.dict())
+        if response.token.price_usd is None:
+            raise ModelDataError('Response token price is None')
+
         total_supply_scaled = input.token.total_supply().scaled
 
         for c in response.categories:
@@ -183,9 +188,14 @@ class TokenCirculatingSupply(credmark.model.Model):
             categoryName='uncategorized',
             categoryType='uncategorized',
             circulating=True,
-            amountScaled=total_supply_scaled - sum([c.amountScaled for c in response.categories])
+            amountScaled=total_supply_scaled -
+            sum([c.amountScaled for c in response.categories])
         ))
-        response.circulatingSupplyScaled = sum(
-            [c.amountScaled for c in response.categories if c.circulating])
+
+        all_circulating = [c.amountScaled for c in response.categories if c.circulating]
+        if len(all_circulating) > 0:
+            response.circulatingSupplyScaled = sum(all_circulating)
+        else:
+            response.circulatingSupplyScaled = 0
         response.circulatingSupplyUsd = response.circulatingSupplyScaled * input.token.price_usd
         return response

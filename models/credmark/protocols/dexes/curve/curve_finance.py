@@ -184,7 +184,7 @@ class CurveFinanceAllGaugeAddresses(credmark.model.Model):
         addrs = self.context.ledger.get_transactions(
             columns=[TransactionTable.Columns.FROM_ADDRESS],
             where=f'{TransactionTable.Columns.TO_ADDRESS}=\'{input.address.lower()}\'')
-        return addrs
+        return addrs.dict()
 
 
 class CurveGaugeInput(DTO):
